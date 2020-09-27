@@ -1,14 +1,25 @@
 # PDI_BPCS
-Guilherme dos Santos Marcon NUSP 9293564
+Source code of original BPCS from Guilherme dos Santos Marcon NUSP 9293564
 
-Esteganografia BPCS
+"Hiding images in images by BPCS method (Bit-Plane Complexity Segmentation)
 
-Ocultamento de imagens em imagens pelo método BPCS (Bit-Plane Complexity Segmentation)
+Either aim of the project and intuitively implement the BPCS method of steganography, which in this case will serve to hide an image in another to be recovered. The method consists in hiding pixels from the image in blocks of a bit plane whose bits are, if they have noisy behavior, it takes advantage of the characteristic of human vision to concentrate not to reconcile patterns and shapes.
 
-  O objetivo desse projeto é implementar intuitivamente o método BPCS de esteganografia, que nesse caso servirá para ocultar uma imagem em outra e a recuperar. O método consiste em ocultar pixels da imagem alvo em blocos de um plano de bit cujos bits em si possuem comportamento ruidoso, ele se aproveita na característica da visão humana de se concentrar no reconhecimento de padrões e formas.
+All the images used are non-directory "images" and the forms removed and modified from the site https://www.pexels.com/public-domain-images/, being transformed for the png format and reduced or size for simpler tests. The links of each individual image are saved in the ImagesLinks.txt file.
 
-Todas as imagens utilizadas estão no diretório "imagens" e elas foram retiradas e modificadas do site https://www.pexels.com/public-domain-images/, sendo transformadas para o formato png e reduzidas o tamanho para testes mais simples. Os links de cada imagem individual estão salvas no arquivo ImagesLinks.txt.
+The main methods used are: read, save and manipulate the images using the imageio and numpy python libraries; transform imagem from Pure Binary Code to Canonical Gray Code and vice-versa; Check if a block of a bit plane is considered complex.
 
-Os principais métodos utilizados são: ler, salvar e manipular as imagens utilizando as bibliotecas imageio e numpy do python; transformar a imagem de Pure Binary Code para Canonical Gray Code e vice-versa; checar se um bloco de um plano de bit é considerado complexo.
+By Git do not receive files larger than 25MB, some repository images and two tests will not be available."
 
-Por conta do Git não receber arquivos maiores que 25MB, algumas imagens do repositório e dos testes não estarão disponíveis.
+# Added GUI interface to make program more interactive and user friendly
+Made use of Tkinter's side properties for proper placement
+
+# Instructions
+Run BPCS.py
+- python BPCS.py
+
+To embed a Target Image, ensure chosen Vessel Image is bigger than Target Image in terms of size and dimensions. 
+
+User can select images from the images folder. Final image that has been embedded will be placed in main directory and named as "finalstego.png"
+
+To recover a hidden Image, ensure "finalstego.png" is chosen. Hidden image will then be previewed on the GUI and printed out on the main directory as "HiddenImg.png"
