@@ -34,7 +34,15 @@ bitWiseOrder = np.array([7,   6,  5,  4,  3, 2, 1, 0], dtype=np.uint8)
 
 ## using classes to make the code more understandable
 ## VesselIterator is a class to iterate through and modify the vessel image
-## It contais methods like: nextComplexPlane(), getPlane() and insertPlane(plane)
+## Functions:
+# - getVessel()
+# - nextplane()
+# - nextComplexPlane()
+# - getBlock()
+# - getPlane()
+# - getCoord()
+# - insertPlane()
+# - insertBits() 
 class VesselIterator:
     def __init__(self, vesselImage):
         ## Preparing the vessel, separating the image bit plane wise
@@ -115,9 +123,13 @@ class VesselIterator:
     ## Properly insert the 1 bit target plane at the Bth bit plane of vessel
     def insertBits(self, plane):
         self.vessel[self.__x:self.__x+8, self.__y:self.__y+8, self.__z,bitWiseOrder[self.__B]] = plane
+##============================================================================================================
 
 ## TargetIterator is a class to iterate through the target image
-## It contains methods like: nextPlane()
+## Functions:
+# - nextPlane()
+# - set()
+# - next()
 class TargetIterator:
     def __init__(self, targetImage):
         self.__target = targetImage
@@ -131,7 +143,6 @@ class TargetIterator:
 
         for i in range(8-columns, 8):
             bin_number = np.binary_repr(self.__iter[0], width=8)
-            ## plane[:,i] = ord(bin_number[:])-ord('0') doesn't work
             for B in range(0, 8):
                 plane[B, i] = ord(bin_number[B])-ord('0')
             self.next()
@@ -147,9 +158,14 @@ class TargetIterator:
         self.__iter.iternext()
         if self.__iter.finished:
             self.finished = True
+##============================================================================================================
 
 ## ConjugationMap is the class that marks if determinated plane is conjugated or not
-## It contains methods like: set(bit) and next()
+## Functions:
+# - reset()
+# - set()
+# - get()
+# - next()
 class ConjugationMap:
     def __init__(self, targetShape):
         self.maxTargetBlocks = int(np.ceil(targetShape[0]*
@@ -183,6 +199,7 @@ class ConjugationMap:
                 self.finished = True
         if self.__count >= self.maxTargetBlocks:
             self.finished = True        
+##============================================================================================================
 
 ## Hides T inside of V, by the BPCS method
 ## V: vessel image
@@ -238,7 +255,13 @@ def BPCS_hide(V, T):
     print("Transforming vessel back to PBC")
     return CGCtoPBC(Viter.getVessel(oldVessel=V))
 
-
+## Hidden Iterator iterates through target image that has been embedded in 'finalstego'
+## Verifies whether a shape exists inside the vessel image
+# Functions:
+# - reset()
+# - nextPlane()
+# - setPlane()
+# - getImage()
 class HiddenIterator:
     def __init__(self, Tshape):
         self.__Tshape = Tshape
@@ -272,14 +295,17 @@ class HiddenIterator:
 
         while not Titer.finished:
             for i in range(8-columns, 8):
-##                print("Setting: ", np.multiply(self.__planes[self.__i,:,i], auxVec).sum())
                 Titer.set(np.multiply(self.__planes[self.__i,:,i], bitWiseArray).sum())
                 Titer.next()
                 if Titer.finished: break
             self.nextPlane()
         
         return T
+##============================================================================================================
 
+# Extracts target Image from vessel Image. Converts Vessel Image from PBC to CGC and iterates through Vessel Image.
+# Once Target Image shape is detected, it recovers Conjugation map and conjugates back the image
+# Transforms Image back to PBC from CGC
 def BPCS_unhide(V):
     print("Transforming vessel to CGC")
     V = PBCtoCGC(V)
@@ -338,7 +364,7 @@ def BPCS_unhide(V):
     
     print("Transforming back image")
     return Hiter.getImage(Tshape)
-    
+ ##============================================================================================================   
 
 ## Creates the initPlanes, which are 2 planes that contains T.shape
 ## The first half of the first plane contains which block is conjugated
@@ -425,79 +451,20 @@ def CGCtoPBC(CGC):
         PBC[:,i,:] = np.bitwise_xor(CGC[:,i,:], PBC[:,i-1,:])
     return PBC
 
+# Compares Root Mean Square Error that detects difference in noise between 2 images
 def compareRMSE(H, HL):
-    # HL = ^H
     return np.sqrt((np.power(H-HL, 2).sum())/(H.shape[0]*H.shape[1]))
-    
+##============================================================================================================
+
 ## Main
-# print("BPCS Steganography\nInsert operation:\nHide -> 1\n"+
-#       "Unhide -> 2\nCompare RMSE -> 3\nDEMO -> 4\n")
-# operation = int(input())
-
-# def embedImageMethod(self):
-#     print("Vessel name:")
-#     vessel_name = 
-#     V = imageio.imread(vessel_name).astype(np.uint8)
-#     Vmult = V.shape[0]*V.shape[1]*V.shape[2]
-    
-#     print("Target name: ")
-#     target_name = str(input()).rstrip()
-#     T = imageio.imread(target_name).astype(np.uint8)
-#     Tmult = T.shape[0]*T.shape[1]*T.shape[2]
-    
-#     print("Final image name:")
-#     final_name = str(input()).rstrip()
-
-#     t = time.time()
-#     F = BPCS_hide(V, T)
-#     t = time.time()-t
-
-#     f = open(final_name.split('.')[0]+".txt", "w+")
-#     f.write("Vessel: "+vessel_name+"\n\tSize: "+str(os.path.getsize(vessel_name))+" bytes\n")
-#     f.write("Target: "+target_name+"\n\tSize: "+str(os.path.getsize(target_name))+" bytes\n")
-#     f.write("Percentage:\t"+str.format("%.5f" % (100*Tmult/Vmult))+"\n")
-    
-#     if F is None :
-#         f.write("Insufficient complex blocks to image be inserted.")
-#         print("Insufficient complex blocks to image be inserted.")
-#     else:
-#         imageio.imwrite(final_name, F)
-#         f.write("Time:\t\t"+str.format("%.5f" % t)+" seconds\n")
-#         f.write("RMSE:\t\t"+str.format("%.5f" % compareRMSE(V, F))+"\n")
-
-#     f.close()
-    
-# elif operation == 2:
-#     print("Vessel name:")
-#     vessel_name = str(input()).rstrip()
-#     V = imageio.imread(vessel_name).astype(np.uint8)
-    
-#     print("Final image name:")
-#     final_name = str(input()).rstrip()
-    
-#     t = time.time()
-#     F = BPCS_unhide(V)
-#     t = time.time()-t
-    
-#     if F is None: print("Error... Vessel image contains no message.")
-#     else:
-#         f = open(final_name.split('.')[0]+".txt", "w+")
-#         f.write("Time: "+str.format("%.5f" % t)+" seconds\n")
-#         imageio.imwrite(final_name, F)
-#         f.close()
-
-# elif operation == 3:
-#     print("First image:")
-#     first_name = str(input()).rstrip()
-#     print("Second image:")
-#     second_name = str(input()).rstrip()
-
-#     print("RMSE: ", compareRMSE(imageio.imread(first_name).astype(np.uint8),
-#                                 imageio.imread(second_name).astype(np.uint8)))
 
 
-    # APPLICATION GUI AND ITS VARS AND CLASSES
+    # APPLICATION GUI AND ITS VARIABLES AND CLASSES
 
+## Application class that contains mostly GUI interface on Load commands and functions
+# involves compressing .PNG image that has been chosen to fit into image panel on GUI
+# size of image panel is indicated below 200 x 300
+# images beyond a certain dimension cant be compressed to fit in the designated image panel
 class Application(Frame):
     def __init__(self, master=None):
         self.file_name = ''
@@ -655,6 +622,7 @@ class Application(Frame):
         width, height = stego_img.size
         scale_width = img_display_width / width
         scale_height = img_display_height / height
+
         # get smallest compression capability of image
         scale = min(scale_width, scale_height)
         new_width = math.ceil(scale * width)
@@ -815,7 +783,7 @@ class Application(Frame):
             self.target_img_canvas.create_text(150,100,fill="darkblue",font="Times 10 bold",
                         text="Target Img will be displayed here.")
             self.target_img_canvas.pack(side=LEFT)
-
+##============================================================================================================
             
             
 
@@ -834,8 +802,5 @@ img_display_height = 200
 app = Application()
 app.master.title('My Steganography')
 app.mainloop()
-
-
-
-    
-    # ======================================================================================================
+##============================================================================================================
+##                              END OF CODE
